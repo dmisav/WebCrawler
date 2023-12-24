@@ -4,6 +4,8 @@ namespace WebCrawlerConsoleAgent.PageCrawler;
 
 public class PageCrawler
 {
+    private readonly PageParser _parser = new PageParser();
+    
     public async void StartCrawlAsync()
     {
         var channel = Channel.CreateUnbounded<WebPage>();
@@ -17,14 +19,33 @@ public class PageCrawler
             ctx, 
             async (webPage, ctx) =>
             {
-                WebPage page = await GetPageUrlsAsync(webPage);
-                foreach (var subPage in page.subPages)
+                HashSet<WebPage> subPages = await GetSubPagesAsync(webPage);
+                foreach (var subPage in subPages)
                 {
-                    channel.Writer.WriteAsync(subPage);
+                    await channel.Writer.WriteAsync(subPage);
                 }
             });
 
     }
+
+    private async Task<HashSet<WebPage>> GetSubPagesAsync(WebPage sourcePage)
+    {
+        var res = string.Empty;
+        using (var client = new HttpClient())
+        {
+            using (HttpResponseMessage message = client.GetAsync(new Uri(sourcePage.PageUrl)).Result)
+            {
+                using (HttpContent content = message.Content)
+                {
+                    res = content.ReadAsStringAsync().Result;
+                }
+            }
+        }
+
+        var subPages = _parser.Parse(res);
+        return subPages;
+    }
+
 }
 
 /*
