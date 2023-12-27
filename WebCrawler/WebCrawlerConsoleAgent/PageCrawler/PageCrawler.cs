@@ -5,35 +5,40 @@ namespace WebCrawlerConsoleAgent.PageCrawler;
 public class PageCrawler
 {
     private readonly PageParser _parser = new PageParser();
-    
-    public async void StartCrawlAsync()
+    string userAgent = "ConsoleAppUserAgent/1.0";
+    public async void StartCrawlAsync(string starturl, CancellationToken ctx)
     {
-        var channel = Channel.CreateUnbounded<WebPage>();
-        var ctx = new CancellationTokenSource().Token;
+        var channel = Channel.CreateUnbounded<string>();
         var crawlOptions = new ParallelOptions()
         {
+            MaxDegreeOfParallelism = 100,
             CancellationToken = ctx
         };
+        await channel.Writer.WriteAsync(starturl);
 
         await Parallel.ForEachAsync(channel.Reader.ReadAllAsync(),
             ctx, 
             async (webPage, ctx) =>
             {
-                HashSet<WebPage> subPages = await GetSubPagesAsync(webPage);
+                HashSet<string> subPages = await GetSubPagesAsync(new Uri(webPage));
                 foreach (var subPage in subPages)
                 {
-                    await channel.Writer.WriteAsync(subPage);
+                    if (Uri.TryCreate(subPage, UriKind.Absolute, out _))
+                    {
+                        if (new Uri(subPage).Scheme != "file")
+                            await channel.Writer.WriteAsync(subPage);
+                    }
                 }
             });
-
     }
 
-    private async Task<HashSet<WebPage>> GetSubPagesAsync(WebPage sourcePage)
+    private async Task<HashSet<string>> GetSubPagesAsync(Uri sourcePageUrl)
     {
         var res = string.Empty;
         using (var client = new HttpClient())
         {
-            using (HttpResponseMessage message = client.GetAsync(new Uri(sourcePage.PageUrl)).Result)
+            client.DefaultRequestHeaders.Add("User-Agent", userAgent);
+            using (HttpResponseMessage message = client.GetAsync(sourcePageUrl).Result)
             {
                 using (HttpContent content = message.Content)
                 {
@@ -41,26 +46,8 @@ public class PageCrawler
                 }
             }
         }
-
+        Console.WriteLine(sourcePageUrl.AbsoluteUri);
         var subPages = _parser.Parse(res);
         return subPages;
     }
-
 }
-
-/*
-var channel = Channel.CreateUnbounded<CrawlerPage>();
-channel.Writer.TryWrite(new CrawlerPage(sourceLink));
-
-var cts = new CancellationTokenSource();
-var options = new ParallelOptions()
-{
-    MaxDegreeOfParallelism = 10,
-    CancellationToken = cts.Token
-};
-
-await Parallel.ForEachAsync(channel.Reader.ReadAllAsync(), async (page, ct) =>
-{
-    CrawlerPage[] subpages = await GetPagesAsync(page);
-    foreach (var subpage in subpages) channel.Writer.TryWrite(subpage);
-});*/

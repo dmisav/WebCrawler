@@ -1,9 +1,14 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿
+using WebCrawlerConsoleAgent.PageCrawler;
 
 internal class Program
 {
     public static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        var crawler = new PageCrawler();
+        var ctx = new CancellationTokenSource().Token;
+        crawler.StartCrawlAsync("https://en.wikipedia.org/wiki/Constantinople",ctx);
+        Console.WriteLine("Crawling in progress");
+        Console.ReadLine();
     }
 }
