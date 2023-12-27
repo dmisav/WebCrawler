@@ -7,7 +7,7 @@ internal class Program
     {
         var crawler = new PageCrawler();
         var ctx = new CancellationTokenSource().Token;
-        crawler.StartCrawlAsync("https://en.wikipedia.org/wiki/Constantinople",ctx);
+        Task.Factory.StartNew(()=>crawler.StartCrawlAsync("https://en.wikipedia.org/wiki/Constantinople",ctx));
         Console.WriteLine("Crawling in progress");
         Console.ReadLine();
     }

@@ -6,7 +6,7 @@ public class PageCrawler
 {
     private readonly PageParser _parser = new PageParser();
     string userAgent = "ConsoleAppUserAgent/1.0";
-    public async void StartCrawlAsync(string starturl, CancellationToken ctx)
+    public async Task StartCrawlAsync(string starturl, CancellationToken ctx)
     {
         var channel = Channel.CreateUnbounded<string>();
         var crawlOptions = new ParallelOptions()

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WebCrawlerConsoleAgent")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2c6d422a38018088edf887755ccef192c0dedea3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+34e2e4e2ab9023e483f7e7fc5a04f68797ca6fa0")]
 [assembly: System.Reflection.AssemblyProductAttribute("WebCrawlerConsoleAgent")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WebCrawlerConsoleAgent")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
